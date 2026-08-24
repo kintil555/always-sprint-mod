@@ -4,7 +4,7 @@
         "uuid": "PASTE-A-NEW-RANDOM-UUID-HERE",
         "namespace": "always_sprint",
         "name": "AlwaysSprint",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "author": "you",
         "is_runtime": false,
         "dependencies": [
