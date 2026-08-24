@@ -66,7 +66,32 @@ jobs:
                 refreshenv
 
                 & "$extractPath\regolith.exe" install-all
-                & "$extractPath\regolith.exe" run local
+
+                # regolith_generators fetches deps from jsr.io at runtime; that
+                # network call occasionally fails transiently on hosted runners.
+                # Retry a few times with backoff before giving up for real.
+                $maxAttempts = 3
+                $attempt = 1
+                $success = $false
+
+                while ($attempt -le $maxAttempts -and -not $success) {
+                  Write-Host "regolith run local (attempt $attempt/$maxAttempts)"
+                  & "$extractPath\regolith.exe" run local
+                  if ($LASTEXITCODE -eq 0) {
+                    $success = $true
+                  } else {
+                    Write-Warning "regolith run local failed (exit $LASTEXITCODE)"
+                    if ($attempt -lt $maxAttempts) {
+                      Start-Sleep -Seconds (10 * $attempt)
+                    }
+                    $attempt++
+                  }
+                }
+
+                if (-not $success) {
+                  Write-Error "regolith run local failed after $maxAttempts attempts"
+                  exit 1
+                }
 
             - name: Build
               run: |
