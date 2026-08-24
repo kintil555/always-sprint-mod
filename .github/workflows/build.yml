@@ -67,6 +67,11 @@ jobs:
 
                 & "$extractPath\regolith.exe" install-all
 
+                # regolith_generators crashes on Deno.readDirSync if the
+                # "generated" output folder doesn't exist yet on a fresh
+                # checkout. Ensure it exists before running the filter.
+                New-Item -ItemType Directory -Force -Path "packs\data\generated" | Out-Null
+
                 # regolith_generators fetches deps from jsr.io at runtime; that
                 # network call occasionally fails transiently on hosted runners.
                 # Retry a few times with backoff before giving up for real.
