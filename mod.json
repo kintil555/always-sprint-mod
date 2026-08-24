@@ -4,7 +4,7 @@
         "uuid": "a8037df3-1e0b-4539-b146-e0e02970d9fc",
         "namespace": "always_sprint",
         "name": "AlwaysSprint",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "author": "you",
         "is_runtime": false,
         "dependencies": [
