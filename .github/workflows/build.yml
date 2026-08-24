@@ -3,6 +3,9 @@ name: Publish Version
 on:
     workflow_dispatch:
 
+permissions:
+    contents: write
+
 env:
     MOD_NAME: AlwaysSprint # Replace with your mod name
 
