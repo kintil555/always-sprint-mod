@@ -1,0 +1,70 @@
+{
+	"namespace": "pause",
+
+	"always_sprint_icon_off": {
+		"type": "image",
+		"texture": "rmlui/assets/sprint_off",
+		"size": [ 12, 12 ],
+		"color": "$light_button_default_text_color",
+		"bindings": [
+			{
+				"binding_name": "#always_sprint_disabled",
+				"binding_name_override": "#visible",
+				"binding_type": "global"
+			}
+		]
+	},
+
+	"always_sprint_icon_on": {
+		"type": "image",
+		"texture": "rmlui/assets/sprint_on",
+		"size": [ 12, 12 ],
+		"color": "$light_button_default_text_color",
+		"bindings": [
+			{
+				"binding_name": "#always_sprint_enabled",
+				"binding_name_override": "#visible",
+				"binding_type": "global"
+			}
+		]
+	},
+
+	"always_sprint_icon": {
+		"type": "panel",
+		"size": [ 12, 12 ],
+		"controls": [
+			{ "off@pause.always_sprint_icon_off": {} },
+			{ "on@pause.always_sprint_icon_on": {} }
+		]
+	},
+
+	"always_sprint_button@common_buttons.light_content_button": {
+		"$pressed_button_name": "button.always_sprint_toggle",
+		"$button_content": "pause.always_sprint_icon",
+		"$button_tts_header": "always_sprint.pause.toggle",
+		"$pressed_alpha": 0.65,
+		"size": [ 28, 28 ]
+	},
+
+	"always_sprint_settings_row": {
+		"type": "stack_panel",
+		"orientation": "horizontal",
+		"size": [ "100%", 28 ],
+		"controls": [
+			{ "settings_button@pause.settings_button": { "size": [ "fill", 28 ] } },
+			{ "always_sprint_gap": { "type": "panel", "size": [ 4, 28 ] } },
+			{ "always_sprint_button@pause.always_sprint_button": {} }
+		]
+	},
+
+	"menu_background/button_panel": {
+		"modifications": [
+			{
+				"array_name": "controls",
+				"operation": "replace",
+				"control_name": "settings_button",
+				"value": { "always_sprint_settings_row@pause.always_sprint_settings_row": {} }
+			}
+		]
+	}
+}
