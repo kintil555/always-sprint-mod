@@ -105,15 +105,56 @@ jobs:
 
                 xmake f -y --automated_build=y
                 xmake
+                if ($LASTEXITCODE -ne 0) {
+                  Write-Error "xmake build failed (exit $LASTEXITCODE)"
+                  exit 1
+                }
+
+                $dll = Get-ChildItem -Path "dist\unpackaged" -Recurse -Filter "*.dll" -ErrorAction SilentlyContinue
+                if (-not $dll) {
+                  Write-Error "Build step: no DLL found under dist\unpackaged after xmake — mod_build.lua's after_build did not run or targetdir is unexpected"
+                  exit 1
+                }
               shell: powershell
+
+            - name: Assemble resource/behavior packs into dist
+              shell: powershell
+              run: |
+                # mod_build.lua's after_build only writes mod.json + the DLL into
+                # dist/unpackaged (the modFolder for automated builds) — it never
+                # copies the regolith-built packs. Do that here, matching the
+                # shipping layout used by Replay.amethyst (mod.json, behavior_packs/,
+                # resource_packs/, win-client/).
+                $stageDir = "dist\unpackaged"
+
+                $rpSrc = "data\packs\RP"
+                $bpSrc = "data\packs\BP"
+
+                if (Test-Path $rpSrc) {
+                  New-Item -ItemType Directory -Force -Path "$stageDir\resource_packs\main_rp" | Out-Null
+                  Copy-Item "$rpSrc\*" "$stageDir\resource_packs\main_rp" -Recurse -Force
+                }
+
+                if (Test-Path $bpSrc) {
+                  $bpFiles = Get-ChildItem $bpSrc -Recurse -File | Where-Object { $_.Name -ne ".gitkeep" }
+                  if ($bpFiles) {
+                    New-Item -ItemType Directory -Force -Path "$stageDir\behavior_packs\main_bp" | Out-Null
+                    Copy-Item "$bpSrc\*" "$stageDir\behavior_packs\main_bp" -Recurse -Force
+                  }
+                }
 
             - name: Package Mod
               shell: powershell
               run: |
                 $zipName = "$env:MOD_NAME@$env:NEW_VERSION.zip"
-                $distPath = "dist"
+                $distPath = "dist\unpackaged"
 
-                $excluded = Get-ChildItem -Path $distPath -Recurse -File | Where-Object { $_.Extension -in ".lib", ".exp" }
+                if (-not (Test-Path $distPath)) {
+                  Write-Error "Package Mod: '$distPath' does not exist — build did not produce a shipping layout"
+                  exit 1
+                }
+
+                $excluded = Get-ChildItem -Path $distPath -Recurse -File | Where-Object { $_.Extension -in ".lib", ".exp", ".pdb", ".ilk", ".bak" }
                 $tempPath = "$env:TEMP\dist_temp"
                 Remove-Item $tempPath -Recurse -Force -ErrorAction SilentlyContinue
                 Copy-Item $distPath $tempPath -Recurse
